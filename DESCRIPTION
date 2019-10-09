@@ -1,12 +1,22 @@
 Package: subgroupTree
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Title: Implements Subgroup Detection Trees with Inference
+Version: 1.0.0
+Authors@R: person("Matthew", "Olson", , "molson5574@gmail.com", c("aut", "cre"))
+Description: Implements CART trees with a splitting criteria designed to
+             locate subsets of a sample with large (or small) treatment effects
+License: MIT + file LICENSE
 LazyData: TRUE
-Suggests: testthat
+Suggests: testthat,
+    knitr,
+    rmarkdown,
+    rpart.plot
 LinkingTo: Rcpp
-Imports: Rcpp
+Imports: Rcpp,
+    partitions,
+    rpart,
+    foreach
+RoxygenNote: 6.0.1
+Author: Matthew Olson [aut, cre]
+Maintainer: Matthew Olson <molson5574@gmail.com>
+VignetteBuilder: knitr

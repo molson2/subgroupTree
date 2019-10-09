@@ -1,0 +1,47 @@
+---
+title: "Using Subgroup Tree"
+author: "Matt Olson"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r message=FALSE, warning=FALSE}
+set.seed(1234)
+n = 2000
+df = data.frame(z1 = sample(c('A', 'B', 'C', 'D'), n, replace = TRUE),
+                x1 = runif(n),
+                z2 = sample(c('a', 'b', 'c', 'd'), n, replace = TRUE),
+                x2 = runif(n),
+                treated = sample(c(FALSE, TRUE), n, replace = TRUE))
+high_ate = df$z1 %in% c('A', 'B') & df$x1 > 0.5
+df$response = rbinom(n, 1, prob = ifelse(high_ate & df$treated, 0.9, 0.5))
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(subgroupTree)
+max_tree = subgroup_tree(df$response, df$treated, df[,1:4],
+                         direction = 'max', maxdepth = 2, minbucket = 100)
+print(max_tree)
+
+min_tree = subgroup_tree(df$response, df$treated, df[,1:4],
+                         direction = 'min', maxdepth = 1, minbucket = 100)
+print(min_tree)
+```
+
+```{r, fig.show='hold', fig.align='center', message=FALSE, warning=FALSE}
+library(rpart.plot)
+rpart.plot(max_tree, extra=1)
+```
+
+```{r, message=FALSE, warning=FALSE}
+max_perm = subgroup_perm_test(df$response, df$treated, df[,1:4],
+                     direction = 'min', ate = 0.0, minbucket = 100)
+```
+
+```{r, message=FALSE, warning=FALSE}
+```
+

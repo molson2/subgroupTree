@@ -1,6 +1,6 @@
-context('test cumulative split functions')
+context('test split functions and friends')
 
-test_that("cumulative ates and tscores work", {
+test_that('cumulative ates and tscores work', {
 
   # problem setup
   set.seed(123)
@@ -46,6 +46,5 @@ test_that("cumulative ates and tscores work", {
 
   expect_equal(node_tscores, tscores)
   expect_equal(node_ates, ates)
-
 })
 
