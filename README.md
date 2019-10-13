@@ -6,7 +6,7 @@ The `subgroupTree` package implements the subgroup detection and permutation-bas
 You can install the latest development version from github with:
 
 ``` r
-devtools::install_github("molson2/subgroupTree", build_vignettes = TRUE
+devtools::install_github("molson2/subgroupTree", build_vignettes = TRUE)
 ```
 
 You should also check out the package's vignette for a sample use case:
