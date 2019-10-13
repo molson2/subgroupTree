@@ -1,4 +1,4 @@
 #' subgroupTree: A package for subgroup decection with trees
 #' @doctype package
-#' @name JOUSBoost
+#' @name subgroupTree
 NULL
