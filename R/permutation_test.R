@@ -16,6 +16,9 @@ subgroup_perm_test <- function(response, treated, X,
                                direction = c('max', 'min'), n_perm = 1000,
                                ate = 0.0, minbucket = 100){
   direction = match.arg(direction)
+  if(!is.numeric(response)){
+    stop('response must be numeric')
+  }
   agg_op = ifelse(direction == 'max', max, min)
 
   perms = foreach::`%dopar%`(foreach::foreach(i = seq(n_perm)), {
@@ -39,9 +42,9 @@ tscore <- function(response, treated, cond, ate = 0.0){
   nc = sum(cond & !treated)
   mt = mean(response[cond & treated])
   mc = mean(response[cond & !treated])
-  vart = (mean(response[cond & treated]^2) - mt^2) / sum(cond & treated)
-  varc = (mean(response[cond & !treated]^2) - mc^2) / sum(cond & !treated)
-  t_score = (mt - mc - ate) / sqrt(vart / nt + varc / nc)
+  vart = (mean(response[cond & treated]^2) - mt^2) / nt
+  varc = (mean(response[cond & !treated]^2) - mc^2) / nc
+  t_score = (mt - mc - ate) / sqrt(vart + varc)
   return(t_score)
 }
 
@@ -57,7 +60,7 @@ best_split <- function(response, treated, x, agg_op, ate = 0.0,
                                       x[sort_ix], ate, minbucket)
       agg_t = agg_op(node_scores, na.rm = TRUE)
     }else{
-      parts = partitions(length(nlevels(x)))
+      parts = partitions(nlevels(x))
       for(i in 1:ncol(parts)){
         lgroup = levels(x)[parts[, i]]
         rgroup = levels(x)[!parts[, i]]

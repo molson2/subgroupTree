@@ -1,5 +1,5 @@
 ---
-title: "Using Subgroup Tree"
+title: "Using subgroupTree for Subgroup Detection"
 author: "Matt Olson"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -8,6 +8,40 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+
+## Background ##
+
+In randomized treatment control studies, some subsets of the population may
+benefit from an intervention more than others.  We measure this benefit as
+the average treatment effect, the average difference in response between
+the treatment and control group.  For example, in a clinical study measuring
+the effect of a drug on a certain disease, it may be the case that the drug
+is especially effective for women of a certain age.
+
+The aim of the `subgroupTree` package is to identify subsets of a study that
+display particularly large or small treatment effects.  We search for such
+subgroups though a greedy tree growing procedure.  At each stage of the process,
+we recursively search for the single predictor and split which leads to the
+largest observed treatment effect between the subsets defined by that split.
+
+It is also desireable to  conduct inference for any treatment effect that this
+process unconcovers: if we  detect something, we want to know that we are not
+finding it by chance.  In this  setting, classical inferential procedures break
+down since the process requires search and selection.  We implement a permutation
+procedure to provide conservative inference for any detected effects.  At the
+moment, this procedure is only implemented for subgroups defined by a split on a
+single predictor.
+
+## Simulated Example ##
+
+We will illustrate these ideas through a simple simulation.  The data frame
+below contains four predictors `z1`, `x1`, `z2`, `x2`, a treatment indicator
+variable `treated`, and a binary response `response` that is conditioned on each
+of these variables.  By construction, the the expected values of `response` is
+0.9 for treated individuals for which `z1 %in% c('A', 'B') & x1 > 0.5`, and
+is 0.5 otherwise.  In other words, this data set contains a subset that
+displays an average treatment effect of 0.4, and we hope to detect this subset
+with our procedure.
 
 ```{r message=FALSE, warning=FALSE}
 set.seed(1234)
@@ -21,27 +55,66 @@ high_ate = df$z1 %in% c('A', 'B') & df$x1 > 0.5
 df$response = rbinom(n, 1, prob = ifelse(high_ate & df$treated, 0.9, 0.5))
 ```
 
+The `subgroup_tree` function implements our greedy search procedure and relies
+heavily on the `rpart` package.  In the call below, we specify that we
+intend to search for **large** treatment effects by specifying `direction = 'max'`,
+and we pass in two parameters that govern the tree-growing process.  Specifically,
+we search for trees of depth two, and we consider only splits of nodes that
+contain 100 or more observations.
+
 ```{r, message=FALSE, warning=FALSE}
 library(subgroupTree)
 max_tree = subgroup_tree(df$response, df$treated, df[,1:4],
                          direction = 'max', maxdepth = 2, minbucket = 100)
 print(max_tree)
-
-min_tree = subgroup_tree(df$response, df$treated, df[,1:4],
-                         direction = 'min', maxdepth = 1, minbucket = 100)
-print(min_tree)
 ```
+
+Each line of the output provides information about the structure of the tree
+and the average treatment effect computed at each node. We can see from line 7
+that the tree detects an average treatment effect of 0.422 among units for
+which `z1 == B & x1>=0.5326`. Alternatively, it can be
+more convenient to view the same output in graphical form.
 
 ```{r, fig.show='hold', fig.align='center', message=FALSE, warning=FALSE}
 library(rpart.plot)
 rpart.plot(max_tree, extra=1)
 ```
 
-```{r, message=FALSE, warning=FALSE}
-max_perm = subgroup_perm_test(df$response, df$treated, df[,1:4],
-                     direction = 'min', ate = 0.0, minbucket = 100)
+For illustration, we also demonstrate the effect of changing `direction = 'min'`.
+In this case, we are directing the tree to search for subgroups with small
+treatment effects (i.e. negative, but large in absolute value).
+
+```{r, message = FALSE, warning = FALSE}
+min_tree = subgroup_tree(df$response, df$treated, X = df[,1:4],
+                         direction = 'min', maxdepth = 1, minbucket = 100)
+print(min_tree)
 ```
 
+In the tree above, we detect a treatment effect among individuals for which
+`x1 < 0.055`.  Of course, by construction the population treatment effects
+in this group is zero.  We illustrate our inferential procedure to confirm this.
+Each iteration of our permutation procedure shuffles the response and calculates
+the largest possible treatment effect t-value that can result splitting the data
+into two groups.  At the moment, our implementation only handles single splits
+of the data for computational tractability.
+
 ```{r, message=FALSE, warning=FALSE}
+
+# sampled t-values
+perm_t_score = subgroup_perm_test(df$response, df$treated, df[,1:4],
+                                  direction = 'min', ate = 0.0, minbucket = 100)
+
+# t-value for different in
+subgroup = (df$x1 < 0.055)
+t_score = with(df, t.test(response[treated & subgroup],
+                          response[!treated & subgroup], alternative = 'less'))
+
+# permutation p-value
+mean(perm_t_score <=  t_score$statistic)
 ```
+
+
+
+
+
 

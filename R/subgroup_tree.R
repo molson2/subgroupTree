@@ -32,12 +32,12 @@ subgroup_tree <- function(response, treated, X, direction = c('max', 'min'),
   }else if(direction == 'min'){
     split_funcs = list(eval = e_treat, split = s_treat_min, init = i_treat)
   }
-  control = rpart.control(minxval = 0, cp = -Inf, ...)
+  control = rpart::rpart.control(minxval = 0, cp = -Inf, ...)
   X$response = response
   X$treated = treated
-  fit = rpart(response ~ . - treated, data=X,
-              weights=ifelse(X$treated, 1, 0.5),
-              method=split_funcs, control=control)
+  fit = rpart::rpart(response ~ . - treated, data=X,
+                     weights=ifelse(X$treated, 1, 0.5),
+                     method=split_funcs, control=control)
   return(fit)
 }
 
