@@ -2,7 +2,10 @@ Package: subgroupTree
 Type: Package
 Title: Subgroup Detection Trees with Inference
 Version: 1.0.0
-Authors@R: person("Matthew", "Olson", , "molson5574@gmail.com", c("aut", "cre"))
+Authors@R: c(
+    person("Matthew", "Olson", , "molson5574@gmail.com", c("aut", "cre"),
+    person("Richard", "Berk", , "berkr@sas.upenn.edu", c("aut"))
+    )
 Description: Implements CART trees with a splitting criteria designed to
              locate subsets of a dataset with large (or small) treatment effects
 License: MIT + file LICENSE

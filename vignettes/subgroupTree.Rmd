@@ -1,6 +1,6 @@
 ---
 title: "Using subgroupTree for Subgroup Detection"
-author: "Matt Olson"
+author: "Matt Olson and Richard Berk"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -11,26 +11,11 @@ vignette: >
 
 ## Background ##
 
-In randomized treatment control studies, some subsets of the population may
-benefit from an intervention more than others.  We measure this benefit as
-the average treatment effect, the average difference in response between
-the treatment and control group.  For example, in a clinical study measuring
-the effect of a drug on a certain disease, it may be the case that the drug
-is especially effective for women of a certain age.
+  In randomized, controlled treatment (RCT) studies, some subsets of the population may benefit from an intervention more than others. Some subsets may also be harmed. One can define these outcomes as a local average treatment effect in which the average treatment effect for the subset differs substantially from the average treatment effect for the all study subjects. For example, in a clinical study measuring the effect of a drug on a certain disease, it may be the drug may be especially effective for women of a certain age. Alternatively, such women may experience harmful side effects.
 
-The aim of the `subgroupTree` package is to identify subsets of a study that
-display particularly large or small treatment effects.  We search for such
-subgroups though a greedy tree growing procedure.  At each stage of the process,
-we recursively search for the single predictor and split which leads to the
-largest observed treatment effect between the subsets defined by that split.
+The aim of the `subgroupTree` package is to identify subsets of a study subjects that display particularly large positive or large negative average treatment effects. The procedure searches for such subgroups though a greedy tree growing procedure. At each stage, the procedure recursively seeks the single predictor and split leading to the largest observed average treatment effect between the subsets defined by that split.
 
-It is also desireable to  conduct inference for any treatment effect that this
-process unconcovers: if we  detect something, we want to know that we are not
-finding it by chance.  In this  setting, classical inferential procedures break
-down since the process requires search and selection.  We implement a permutation
-procedure to provide conservative inference for any detected effects.  At the
-moment, this procedure is only implemented for subgroups defined by a split on a
-single predictor.
+It is also desirable to conduct statistical tests for any local average treatment effect, typically for a null hypothesis that the average local treatment effect equals 0.0. In this setting, classical inferential procedures break down because the process requires adaptive search and selection. We implement a permutation procedure to provide conservative inference for any detected effects. Currently, this is implemented only for subgroups defined by a split on a single predictor based on a tree stump. Larger trees present computational challenges. Details can be found in Berk et al., *Using Recursive Partitioning to Find and Estimate Heterogenous Treatment Effects In Randomized Clinical Trials*  Journal of Experimental Criminology, forthcoming, 2020.
 
 ## Simulated Example ##
 
